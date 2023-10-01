@@ -1,0 +1,49 @@
+version: '3'
+services:
+  keycloak:
+    container_name: keycloak
+    hostname: keycloak
+    image: quay.io/keycloak/keycloak:20.0
+    environment:
+      # Database configuration
+      KC_DB: mariadb
+      KC_DB_URL: jdbc:mariadb://mariadb:3306/keycloak
+      KC_DB_USERNAME: rem
+      KC_DB_PASSWORD: lugnica1234!
+      KC_HOSTNAME_URL: https://localhost
+      KC_HTTP_ENABLED: true
+      KEYCLOAK_ADMIN: rem
+      KEYCLOAK_ADMIN_PASSWORD: lugnica1234!
+    command:
+      - 'start'
+      # HTTPS configuration
+      - '--https-certificate-file=/etc/certificates/keycloak-certificates/localhost.crt'
+      - '--https-certificate-key-file=/etc/certificates/keycloak-certificates/localhost.key'
+      # Client authentication configuration
+      - '--https-client-auth=request'
+      - '--https-key-store-file=/etc/certificates/keycloak-certificates/localhost.p12'
+      - '--https-key-store-password=123456'
+      - '--https-trust-store-file=/etc/certificates/root-ca/truststore.jks'
+      - '--https-trust-store-password=123456'
+    volumes:
+      - ./certificates/:/etc/certificates/
+    ports:
+      - "80:8080"
+      - "443:8443"
+
+  database:
+    container_name: mariadb
+    hostname: mariadb
+    image: mariadb:latest
+    environment:
+      MARIADB_DATABASE: keycloak
+      MARIADB_USER: rem
+      MARIADB_PASSWORD: lugnica1234!
+      MARIADB_ROOT_PASSWORD: definetlynotknown
+    ports:
+      - "3306:3306"
+
+networks:
+  local:
+    name: local
+    driver: bridge
